@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::{
     common::{
         error::{AppError, NotFoundError},
@@ -8,9 +10,9 @@ use crate::{
             model::{ClientEvent, MessageDto, RoomDto, ServerEvent},
             repository::RoomRepo,
         },
-        user::{model::UserId},
+        user::model::UserId,
     },
-    state::AppState,
+    state::{AppState, RoomState},
 };
 use axum::{
     Extension, Json,
@@ -84,17 +86,20 @@ pub async fn ws_handler(
 pub async fn handler_socket(socket: WebSocket, state: AppState, room_id: Uuid, user_id: Uuid) {
     let mut rooms = state.rooms.lock().await;
 
-    let tx = rooms
+    let room_state = rooms
         .entry(room_id.to_string())
         .or_insert_with(|| {
             let (tx, _rx) = broadcast::channel(100);
-            tx
+            RoomState {
+                tx,
+                members: HashSet::new()
+            }
         })
         .clone();
 
     drop(rooms);
 
-    let mut rx = tx.subscribe();
+    let mut rx = room_state.tx.subscribe();
     let (mut sender, mut receiver) = socket.split();
 
     // send history
@@ -124,7 +129,7 @@ pub async fn handler_socket(socket: WebSocket, state: AppState, room_id: Uuid, u
 
     // receive task
     let pool: sqlx::Pool<sqlx::Postgres> = state.pool.clone();
-    let tx_for_recv = tx.clone();
+    let tx_for_recv = room_state.tx.clone();
 
     let mut recv_task = tokio::spawn(async move {
         let mut receiver = receiver;
