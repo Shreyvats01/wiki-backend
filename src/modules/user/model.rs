@@ -8,6 +8,7 @@ use crate::{common::error::ValidationError};
 pub struct User {
     pub id: Uuid,
     pub name: String,
+    pub username: String,
     pub email: String,
     pub password: String,
     pub is_public: bool
@@ -17,6 +18,7 @@ pub struct User {
 pub struct UserResponseDto {
     pub id: Uuid,
     pub name: String,
+    pub username: String,
     pub email: String,
     pub is_public: bool
 }
@@ -28,6 +30,7 @@ pub struct UpdateVisibility {
 
 pub struct SignUpCredentials {
     pub name: String,
+    pub username: String,
     pub email: String,
     pub password: String,
 }
@@ -49,6 +52,7 @@ pub struct LoginDto {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SignUpDto {
     pub name: String,
+    pub username: String,
     pub email: String,
     pub password: String,
 }
@@ -59,6 +63,7 @@ impl TryFrom<SignUpDto> for SignUpCredentials {
         let email = value.email.trim();
         let name = value.name.trim();
         let password = value.password.trim();
+        let username = value.username.trim();
 
         if !email.contains("@") || email.len() < 5 {
             return Err(ValidationError::InvalidEmail);
@@ -75,7 +80,8 @@ impl TryFrom<SignUpDto> for SignUpCredentials {
         Ok(Self {
             email: email.to_string(),
             name: name.to_string(),
-            password: password.to_string()
+            password: password.to_string(),
+            username: username.to_string()
         })
         
     }

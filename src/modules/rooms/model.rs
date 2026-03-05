@@ -8,10 +8,10 @@ use crate::{common::error::{AppError, ValidationError}, modules::rooms::service:
 #[derive(FromRow, Serialize)]
 pub struct Room {
     pub id: Uuid,
-    pub owner_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub profile_pic: Option<String>,
+    pub owner_id: Uuid,
     pub created_at: OffsetDateTime,
 }
 

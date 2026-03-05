@@ -100,7 +100,7 @@ pub async fn handler_socket(socket: WebSocket, state: AppState, room_id: Uuid, u
     drop(rooms);
 
     let username = match UserRepo::fetch_by_id(&state.pool, user_id).await {
-        Ok(Some(user)) => user.name,
+        Ok(Some(user)) => user.username,
         Ok(None) => {
             eprintln!("User not found for id: {user_id}");
             return;

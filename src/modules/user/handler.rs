@@ -1,7 +1,8 @@
-use axum::{Extension, Json, extract::State, response::IntoResponse};
+use axum::{Extension, Json, extract::{Path, State}, response::IntoResponse};
 use axum_extra::extract::CookieJar;
 use axum_macros::debug_handler;
 use tower_cookies::Cookie;
+use time::Duration;
 
 use crate::{
     common::{error::{AppError, ValidationError}, response::ApiResponse},
@@ -53,6 +54,20 @@ pub async fn login_user(
     ))
 }
 
+pub async fn logout(jar: CookieJar) -> impl IntoResponse {
+    let jar = jar.remove(
+        Cookie::build(("jwt", ""))
+            .http_only(true)
+            .path("/")
+            .max_age(Duration::seconds(0)),
+    );
+
+    (
+        jar,
+        Json(ApiResponse::success("User logout successfuly", None::<()>)),
+    )
+}
+
 pub async fn delete_user_handler(
     State(state): State<AppState>,
     Extension(user_id): Extension<UserId>,
@@ -68,6 +83,23 @@ pub async fn get_user_handler(
     Extension(user_id): Extension<UserId>,
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
     let user = state.user_service.get(user_id.0).await?;
+
+    Ok(Json(ApiResponse::success("fetch user successfuly", user)))
+}
+
+pub async fn get_user_by_username_handler(
+    State(state): State<AppState>,
+    Extension(user_id): Extension<UserId>,
+    Path(username): Path<String>,
+) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
+    let user = state.user_service.get_user_by_username(&username).await?; 
+
+    println!("user is {:?}", user);
+    if !user.is_public {
+        if user.id != user_id.0 {
+            return Err(AppError::Validation(ValidationError::UnauthorizedAccess));
+        }
+    }
 
     Ok(Json(ApiResponse::success("fetch user successfuly", user)))
 }

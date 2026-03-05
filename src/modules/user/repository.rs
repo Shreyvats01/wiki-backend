@@ -1,22 +1,32 @@
 use sqlx::{PgPool, Result};
 use uuid::Uuid;
 
-use crate::{common::error::AppError, modules::user::model::{User, UserResponseDto}};
+use crate::{
+    common::error::AppError,
+    modules::user::model::{User, UserResponseDto},
+};
 
 pub struct UserRepo;
 
 impl UserRepo {
-    pub async fn create(pool: &PgPool, name: &str, email: &str, password: &str) -> Result<UserResponseDto> {
+    pub async fn create(
+        pool: &PgPool,
+        name: &str,
+        email: &str,
+        password: &str,
+        username: &str,
+    ) -> Result<UserResponseDto> {
         let user = sqlx::query_as!(
             UserResponseDto,
             r#"
-        INSERT INTO users (name, email, password)
-        VALUES ($1, $2, $3)
-        RETURNING id, name, email, is_public
+        INSERT INTO users (name, username, email, password)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, name, username, email, is_public
         "#,
             name,
+            username,
             email,
-            password
+            password,
         )
         .fetch_one(pool)
         .await?;
@@ -28,7 +38,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             UserResponseDto,
             r#"
-        SELECT id, name, email, is_public
+        SELECT id, name, username, email, is_public
         FROM users
         WHERE id = $1
         "#,
@@ -52,7 +62,7 @@ impl UserRepo {
         .await?;
 
         if result.rows_affected() == 0 {
-            return Err(AppError::Failed("Failed to delete user".into()))
+            return Err(AppError::Failed("Failed to delete user".into()));
         }
 
         Ok(())
@@ -62,7 +72,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             User,
             r#"
-        SELECT id, name, email, password, is_public
+        SELECT id, name, username, email, password, is_public
         FROM users
         WHERE email = $1
         "#,
@@ -73,7 +83,28 @@ impl UserRepo {
 
         Ok(user)
     }
-    pub async fn change_visibility(pool: &PgPool, user_id: &Uuid, is_public: bool) -> Result<(), AppError> {
+
+    pub async fn fetch_by_username(pool: &PgPool, username: &str) -> Result<Option<User>> {
+        let user = sqlx::query_as!(
+            User,
+            r#"
+        SELECT id, name, username, email, password, is_public
+        FROM users
+        WHERE username = $1
+        "#,
+            username
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        Ok(user)
+    }
+
+    pub async fn change_visibility(
+        pool: &PgPool,
+        user_id: &Uuid,
+        is_public: bool,
+    ) -> Result<(), AppError> {
         let result = sqlx::query!(
             r#"
             UPDATE users
@@ -82,12 +113,17 @@ impl UserRepo {
             "#,
             is_public,
             user_id
-        ).execute(pool).await?;
+        )
+        .execute(pool)
+        .await?;
 
         if result.rows_affected() == 0 {
-            return Err(AppError::Failed("Failed to update user's visibility status".into()));
+            return Err(AppError::Failed(
+                "Failed to update user's visibility status".into(),
+            ));
         }
 
         Ok(())
     }
 }
+// username
