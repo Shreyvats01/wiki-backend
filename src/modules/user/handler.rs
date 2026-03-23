@@ -89,16 +89,19 @@ pub async fn get_user_handler(
 
 pub async fn get_user_by_username_handler(
     State(state): State<AppState>,
-    Extension(user_id): Extension<UserId>,
+    user_id: Option<Extension<UserId>>,
     Path(username): Path<String>,
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
     let user = state.user_service.get_user_by_username(&username).await?; 
 
-    println!("user is {:?}", user);
     if !user.is_public {
-        if user.id != user_id.0 {
+        let requester_id = user_id
+            .map(|Extension(user_id)| user_id.0)
+            .ok_or(AppError::Validation(ValidationError::UnauthorizedAccess))?;
+
+        if user.id != requester_id {
             return Err(AppError::Validation(ValidationError::UnauthorizedAccess));
-        }
+        } 
     }
 
     Ok(Json(ApiResponse::success("fetch user successfuly", user)))

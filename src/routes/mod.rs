@@ -22,8 +22,7 @@ use crate::{
             fetch_all_tags_handler, update_todo_handler,
         },
         user::handler::{
-            change_user_visibility_handler, create_user, delete_user_handler, get_user_handler,
-            login_user,
+            change_user_visibility_handler, create_user, delete_user_handler, get_user_by_username_handler, get_user_handler, login_user, logout
         },
     },
     state::AppState,
@@ -45,6 +44,7 @@ pub fn protected_routes() -> Router<AppState> {
         .route("/todo/remove/{id}", delete(delete_todo_handler))
         .route("/user/delete", delete(delete_user_handler))
         .route("/user/me", get(get_user_handler))
+        .route("/user/logout", post(logout))
         .route(
             "/user/update_visibility",
             put(change_user_visibility_handler),
@@ -84,4 +84,5 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/user/create", post(create_user))
         .route("/user/login", post(login_user))
+        .route("/user/{username}", get(get_user_by_username_handler))
 }
