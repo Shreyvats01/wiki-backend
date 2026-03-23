@@ -8,10 +8,10 @@ use uuid::Uuid;
 
 use crate::{
     common::error::AppError,
-    modules::rooms::{
-        model::{MessageDto, MessageResponse, PresenceKind, ServerEvent},
+    modules::{rooms::{
+        model::{Members, MessageDto, MessageResponse, PresenceKind, ServerEvent},
         repository::RoomRepo,
-    },
+    }, user::repository::UserRepo},
     state::{AppState, Member, RoomState},
 };
 
@@ -31,8 +31,9 @@ impl RoomService {
         self,
         message_dto: MessageDto,
         user_id: &Uuid,
+        parent_id: Option<Uuid>
     ) -> Result<MessageResponse, AppError> {
-        let message = RoomRepo::create_message(&self.pool, message_dto, user_id).await?;
+        let message = RoomRepo::create_message(&self.pool, message_dto, user_id, parent_id).await?;
 
         Ok(message)
     }
@@ -103,7 +104,7 @@ impl RoomService {
         }
     }
 
-    pub async fn get_active_members(state: &AppState, room_id: &Uuid) -> Vec<Username> {
+    pub async fn get_active_members(state: &AppState, room_id: &Uuid) -> Result<Vec<Members>, AppError> {
         let rooms = state.rooms.lock().await;
         let mut members: Vec<Username> = Vec::new();
 
@@ -114,6 +115,15 @@ impl RoomService {
             }
         }
 
-        members
+        UserRepo::fetch_users_by_username(&state.pool, members).await
+    }
+
+    pub async fn return_message(state: &AppState, room_id: &Uuid, user_id: &Uuid, server_event: ServerEvent) {
+        let rooms = state.rooms.lock().await;
+        if let Some(room) = rooms.get(room_id) {
+            if let Some(member) = room.members.get(user_id) {
+                let _ = member.tx.send(server_event).await;
+            }
+        }
     }
 }

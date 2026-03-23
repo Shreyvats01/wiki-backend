@@ -27,6 +27,7 @@ pub struct Message {
     pub user_id: Uuid,
     pub room_id: Uuid,
     pub content: String,
+    pub parent_id: Option<Uuid>,
     pub created_at: OffsetDateTime ,
 }
 #[derive(FromRow, Debug, Clone, Serialize, Deserialize)]
@@ -34,16 +35,18 @@ pub struct MessageResponse {
     pub id: Uuid,
     pub user_name: String,
     pub content: String,
+    pub parent_id: Option<Uuid>,
     pub created_at: OffsetDateTime
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "event", content = "payload")]
 pub enum ClientEvent {
-    ChatSend {content: String},
+    ChatSend {content: String, parent_id: Option<Uuid>},
     Ping,
     Typing {is_typing: bool},
-    ActiveMembers
+    ActiveMembers,
+    AllMembers
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -54,13 +57,21 @@ pub enum ServerEvent {
     Presence { user: String, kind: PresenceKind },
     Pong,
     Typing {username: String, is_typing: bool},
-    ActiveMembers (Vec<Username>)
+    ActiveMembers (Vec<Members>),
+    AllMembers (Vec<Members>)
 }
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub enum PresenceKind {
     Join,
     Leave
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct Members {
+    pub user_id: Uuid,
+    pub name: String,
+    pub username: String
 }
 
 #[derive(Debug, Deserialize)]
@@ -99,13 +110,15 @@ impl RoomDto {
 
 pub struct MessageDto {
     pub room_id: Uuid,
-    pub content: String
+    pub content: String,
+    pub parent_id: Option<Uuid>,
 }
 
 impl MessageDto {
     pub fn validate(dto: MessageDto) -> Result<Self, AppError> {
         let room_id = dto.room_id;
         let content = dto.content.trim();
+        let parent_id = dto.parent_id;
 
         if content.len() == 0 {
             return Err(AppError::Validation(ValidationError::InvalidMessage));
@@ -113,7 +126,8 @@ impl MessageDto {
 
         Ok(Self {
             content: content.to_string(),
-            room_id
+            room_id,
+            parent_id
         })
     }
 }
