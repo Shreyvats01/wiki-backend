@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     common::error::AppError,
-    modules::{rooms::{model::Members, service::Username}, user::model::{User, UserResponseDto}},
+    modules::{user::model::{User, UserResponseDto}},
 };
 pub struct UserRepo;
 
@@ -97,20 +97,6 @@ impl UserRepo {
         .await?;
 
         Ok(user)
-    }
-
-    pub async fn fetch_all_users(pool: &PgPool, usernames: Vec<Username>) -> Result<Vec<Members>, AppError> {
-        let users = sqlx::query_as!(
-            Members,
-            r#"
-            SELECT id as user_id, name, username
-            FROM users
-            WHERE username = ANY($1)
-            "#,
-            &usernames
-        ).fetch_all(pool).await?;
-
-        Ok(users)
     }
 
     pub async fn change_visibility(

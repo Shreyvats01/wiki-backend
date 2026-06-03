@@ -1,10 +1,8 @@
-use std::{collections::HashMap, env, sync::Arc};
-use tokio::sync::{Mutex, broadcast};
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{ CorsLayer};
 
 use crate::{
     modules::{
-        progress::service::ProgressService, rooms::service::RoomService,
+        progress::service::ProgressService,
         todo::service::TodoService, user::service::UserService,
     },
     routes::create_app,
@@ -42,8 +40,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         todo_service: TodoService::new(pool.clone()),
         user_service: UserService::new(pool.clone()),
         progress_service: ProgressService::new(pool.clone()),
-        room_service: RoomService::new(pool),
-        rooms: Arc::new(Mutex::new(HashMap::new())),
     };
 
     let cors = CorsLayer::new()

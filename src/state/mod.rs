@@ -1,26 +1,10 @@
-use std::{collections::{HashMap}, sync::Arc};
 
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgPool};
 use uuid::Uuid;
-use tokio::sync::{Mutex, mpsc};
 
-use crate::modules::{progress::service::ProgressService, rooms::{model::{ServerEvent}, service::RoomService}, todo::service::TodoService, user::service::UserService};
-
-type RoomId = uuid::Uuid;
-type UserId = uuid::Uuid;
-
-#[derive(Clone)]
-pub struct Member {
-    pub username: String,
-    pub tx: mpsc::Sender<ServerEvent>
-}
-
-#[derive(Clone)]
-pub struct RoomState {
-    pub members: HashMap<UserId, Member>
-}
+use crate::modules::{progress::service::ProgressService, todo::service::TodoService, user::service::UserService};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -30,8 +14,6 @@ pub struct AppState {
     pub todo_service: TodoService,
     pub user_service: UserService,
     pub progress_service: ProgressService,
-    pub room_service: RoomService,
-    pub rooms: Arc<Mutex<HashMap<RoomId, RoomState>>>
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

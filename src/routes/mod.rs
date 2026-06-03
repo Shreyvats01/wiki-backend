@@ -12,8 +12,6 @@ use crate::{
             delete_daily_progress_todo_handler, fetch_all_daily_progress_todos,
             fetch_daily_progress_todo_by_id, is_progress_exits_handler,
             toggle_daily_progress_todo_handler,
-        }, rooms::handler::{
-            create_room_handler, get_all_rooms_handler, get_room_handler, get_room_membership_handler, join_room_handler, leave_room_handler
         }, todo::handler::{
             create_category_handler, create_tag_handler, delete_category_handler,
             delete_tag_handler, delete_todo_handler, fetch_all_categories_handler,
@@ -69,14 +67,8 @@ pub fn protected_routes() -> Router<AppState> {
             get(fetch_all_daily_progress_todos),
         )
         .route("/progress/is_exits/{day}", get(is_progress_exits_handler))
-        .route("/room", post(create_room_handler))
-        .route("/room/info/{room_id}", get(get_room_handler))
-        .route("/rooms", get(get_all_rooms_handler))
-        .route("/room/{room_id}/join", post(join_room_handler))
-        .route("/room/{room_id}/leave", post(leave_room_handler))
-        .route("/room/{room_id}/membership", get(get_room_membership_handler))
-}
-
+    }
+    
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/user/create", post(create_user))

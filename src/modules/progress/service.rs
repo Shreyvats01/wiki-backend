@@ -3,7 +3,7 @@ use time::Date;
 use uuid::Uuid;
 
 use crate::{
-    common::error::{AppError, NotFoundError},
+    common::error::{AppError},
     modules::progress::{
             model::{CompleteDailyProgressTodo, DailyProgress, DailyProgressTodo, DailyProgressTodoDto, DailyProgressTodoResponse, ProgressTodoRespons},
             repository::ProgressRepo,
