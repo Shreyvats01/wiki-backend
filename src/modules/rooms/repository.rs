@@ -50,6 +50,10 @@ impl RoomRepo {
         Ok(room)
     }
 
+    pub async fn update_room(pool: &PgPool, room_id: Uuid) {
+        
+    }
+
     pub async fn get_all_rooms(pool: &PgPool) -> Result<Vec<Room>> {
         let rooms = sqlx::query_as!(
             Room,
