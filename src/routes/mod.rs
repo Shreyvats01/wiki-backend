@@ -7,23 +7,20 @@ use axum::{
 use crate::{
     middleware::auth::auth_middleware,
     modules::{
-        progress::handler::{
+        main::handler::ws_handler, progress::handler::{
             create_daily_progress_handler, create_daily_progress_todo_handler,
             delete_daily_progress_todo_handler, fetch_all_daily_progress_todos,
             fetch_daily_progress_todo_by_id, is_progress_exits_handler,
             toggle_daily_progress_todo_handler,
-        },
-        rooms::handler::{
-            create_room_handler, get_all_rooms_handler, get_room_handler, get_room_membership_handler, join_room_handler, leave_room_handler, ws_handler
-        },
-        todo::handler::{
+        }, rooms::handler::{
+            create_room_handler, get_all_rooms_handler, get_room_handler, get_room_membership_handler, join_room_handler, leave_room_handler
+        }, todo::handler::{
             create_category_handler, create_tag_handler, delete_category_handler,
             delete_tag_handler, delete_todo_handler, fetch_all_categories_handler,
             fetch_all_tags_handler, update_todo_handler,
-        },
-        user::handler::{
+        }, user::handler::{
             change_user_visibility_handler, create_user, delete_user_handler, get_user_by_username_handler, get_user_handler, login_user, logout
-        },
+        }
     },
     state::AppState,
 };
@@ -38,6 +35,7 @@ pub fn create_app(state: AppState) -> Router {
 
 pub fn protected_routes() -> Router<AppState> {
     Router::new()
+        .route("/room/{room_id}", get(ws_handler))
         // .route("/todo/add", post(create_todo_handler))
         // .route("/todo/get/{id}", get(get_todo_handler))
         .route("/todo/update/{id}", put(update_todo_handler))
@@ -74,7 +72,6 @@ pub fn protected_routes() -> Router<AppState> {
         .route("/room", post(create_room_handler))
         .route("/room/info/{room_id}", get(get_room_handler))
         .route("/rooms", get(get_all_rooms_handler))
-        .route("/room/{room_id}", get(ws_handler))
         .route("/room/{room_id}/join", post(join_room_handler))
         .route("/room/{room_id}/leave", post(leave_room_handler))
         .route("/room/{room_id}/membership", get(get_room_membership_handler))
