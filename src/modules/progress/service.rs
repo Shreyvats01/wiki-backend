@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{
     common::error::{AppError},
     modules::progress::{
-            model::{CompleteDailyProgressTodo, DailyProgress, DailyProgressTodo, DailyProgressTodoDto, DailyProgressTodoResponse, ProgressTodoRespons},
+            model::{CompleteDailyProgressTask, DailyProgress, DailyProgressTask, DailyProgressTaskDto, DailyProgressTaskResponse, ProgressTaskRespons},
             repository::ProgressRepo,
         },
 };
@@ -31,32 +31,32 @@ impl ProgressService {
         Ok(daily_progress)
     }
 
-    pub async fn create_daily_progress_todo(
+    pub async fn create_daily_progress_task(
         &self,
         progress_id: &Uuid,
         user_id: &Uuid,
-        dto: DailyProgressTodoResponse
-    ) -> Result<DailyProgressTodoDto, AppError> {
-        let progress_todo =
-            ProgressRepo::create_daily_progress_todo(&self.pool, progress_id, user_id, dto)
+        dto: DailyProgressTaskResponse
+    ) -> Result<DailyProgressTaskDto, AppError> {
+        let progress_task =
+            ProgressRepo::create_daily_progress_task(&self.pool, progress_id, user_id, dto)
                 .await?;
 
-        Ok(progress_todo)
+        Ok(progress_task)
     }
 
-    pub async fn toggle_daily_progress_todo(&self, progress_todo_id: &Uuid, user_id: &Uuid) -> Result<DailyProgressTodo, AppError>{
-        let todo = ProgressRepo::toggle_daily_progress_todo(&self.pool, progress_todo_id, user_id).await?;
+    pub async fn toggle_daily_progress_task(&self, progress_task_id: &Uuid, user_id: &Uuid) -> Result<DailyProgressTask, AppError>{
+        let task = ProgressRepo::toggle_daily_progress_task(&self.pool, progress_task_id, user_id).await?;
 
-        Ok(todo)
+        Ok(task)
     }
 
-    pub async fn fetch_all_daily_progress_todo(&self, daily_progress_id: &Uuid) -> Result<Vec<CompleteDailyProgressTodo>, AppError> {
-        let progress_todos= ProgressRepo::fetch_all_daily_progress_todos(&self.pool, daily_progress_id).await?;
-        Ok(progress_todos)
+    pub async fn fetch_all_daily_progress_task(&self, daily_progress_id: &Uuid) -> Result<Vec<CompleteDailyProgressTask>, AppError> {
+        let progress_tasks= ProgressRepo::fetch_all_daily_progress_tasks(&self.pool, daily_progress_id).await?;
+        Ok(progress_tasks)
     }
 
-    pub async fn fetch_daily_progress_todo_id(&self, progress_todo_id: &Uuid)-> Result<ProgressTodoRespons, AppError> {
-        let task: ProgressTodoRespons = ProgressRepo::fetch_daily_progress_todo_by_id(&self.pool, progress_todo_id).await?;
+    pub async fn fetch_daily_progress_task_id(&self, progress_task_id: &Uuid)-> Result<ProgressTaskRespons, AppError> {
+        let task: ProgressTaskRespons = ProgressRepo::fetch_daily_progress_task_by_id(&self.pool, progress_task_id).await?;
 
         Ok(task)
     }
@@ -67,8 +67,8 @@ impl ProgressService {
         Ok(progress)
     }
 
-    pub async fn delete_daily_progress_todo(&self, id: &Uuid) -> Result<(), AppError> {
-        ProgressRepo::delete_daily_progress_todo(&self.pool, id).await?;
+    pub async fn delete_daily_progress_task(&self, id: &Uuid) -> Result<(), AppError> {
+        ProgressRepo::delete_daily_progress_task(&self.pool, id).await?;
 
         Ok(())
     }

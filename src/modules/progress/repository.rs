@@ -6,10 +6,10 @@ use crate::{
     common::error::{AppError, NotFoundError},
     modules::{
         progress::model::{
-            CompleteDailyProgressTodo, DailyProgress, DailyProgressTodo, DailyProgressTodoDto,
-            DailyProgressTodoResponse, ProgressTodoRespons,
+            CompleteDailyProgressTask, DailyProgress, DailyProgressTask, DailyProgressTaskDto,
+            DailyProgressTaskResponse, ProgressTaskRespons,
         },
-        todo::model::Todo,
+        task::model::task,
     },
 };
 
@@ -74,18 +74,18 @@ impl ProgressRepo {
         Ok(progress)
     }
 
-    pub async fn create_daily_progress_todo(
+    pub async fn create_daily_progress_task(
         pool: &PgPool,
         daily_progress_id: &Uuid,
         user_id: &Uuid,
-        new_todo: DailyProgressTodoResponse,
-    ) -> Result<DailyProgressTodoDto, AppError> {
+        new_task: DailyProgressTaskResponse,
+    ) -> Result<DailyProgressTaskDto, AppError> {
         let mut tx = pool.begin().await?;
 
-        let todos = sqlx::query_as!(
-            Todo,
+        let tasks = sqlx::query_as!(
+            task,
             r#"
-            INSERT INTO todos (user_id, title, description, category_id)
+            INSERT INTO tasks (user_id, title, description, category_id)
             VALUES ($1, $2, $3, 
         (
             SELECT id
@@ -97,9 +97,9 @@ impl ProgressRepo {
             RETURNING id, user_id, title, description, created_at, updated_at, category_id
             "#,
             user_id,
-            new_todo.todo,
-            new_todo.description,
-            new_todo.category_slug
+            new_task.title,
+            new_task.description,
+            new_task.category_slug
         )
         .fetch_one(&mut *tx)
         .await?;
@@ -120,14 +120,14 @@ impl ProgressRepo {
             return Err(AppError::NotFound(NotFoundError::DailyProgressNotFound));
         }
 
-        let daily_progress_todo = sqlx::query_as!(
-            DailyProgressTodo,
+        let daily_progress_task = sqlx::query_as!(
+            DailyProgressTask,
             r#"
-            INSERT INTO daily_progress_todos (todo_id, daily_progress_id, is_done)
+            INSERT INTO daily_tasks (task_id, daily_progress_id, is_done)
             VALUES ($1, $2, false)
-            RETURNING id, todo_id, daily_progress_id, is_done, created_at 
+            RETURNING id, task_id, daily_progress_id, is_done, created_at 
             "#,
-            todos.id,
+            tasks.id,
             daily_progress_id
         )
         .fetch_one(&mut *tx)
@@ -135,28 +135,28 @@ impl ProgressRepo {
 
     tx.commit().await?;
 
-        let return_value: DailyProgressTodoDto = DailyProgressTodoDto {
-            id: todos.id,
-            title: todos.title,
-            description: todos.description,
-            category_id: todos.category_id,
-            is_done: daily_progress_todo.is_done,
-            created_at: daily_progress_todo.created_at,
+        let return_value: DailyProgressTaskDto = DailyProgressTaskDto {
+            id: tasks.id,
+            title: tasks.title,
+            description: tasks.description,
+            category_id: tasks.category_id,
+            is_done: daily_progress_task.is_done,
+            created_at: daily_progress_task.created_at,
         };
 
         Ok(return_value)
     }
 
-    pub async fn fetch_daily_progress_todo_by_id(
+    pub async fn fetch_daily_progress_task_by_id(
         pool: &PgPool,
         id: &Uuid,
-    ) -> Result<ProgressTodoRespons> {
-        let todo = sqlx::query_as!(
-            ProgressTodoRespons,
+    ) -> Result<ProgressTaskRespons> {
+        let task = sqlx::query_as!(
+            ProgressTaskRespons,
             r#"
-            SELECT pt.id AS progress_todo_id, pt.todo_id, pt.daily_progress_id, pt.is_done, pt.created_at, t.title, t.description
-            FROM daily_progress_todos pt
-            JOIN todos t ON pt.todo_id = t.id
+            SELECT pt.id AS progress_task_id, pt.task_id, pt.daily_progress_id, pt.is_done, pt.created_at, t.title, t.description
+            FROM daily_tasks pt
+            JOIN tasks t ON pt.task_id = t.id
             WHERE pt.id = $1
             "#,
             id
@@ -164,24 +164,24 @@ impl ProgressRepo {
         .fetch_one(pool)
         .await?;
 
-        Ok(todo)
+        Ok(task)
     }
 
-    pub async fn toggle_daily_progress_todo(
+    pub async fn toggle_daily_progress_task(
         pool: &PgPool,
         id: &Uuid,
         user_id: &Uuid,
-    ) -> Result<DailyProgressTodo> {
-        let todo: DailyProgressTodo = sqlx::query_as!(
-            DailyProgressTodo,
+    ) -> Result<DailyProgressTask> {
+        let task: DailyProgressTask = sqlx::query_as!(
+            DailyProgressTask,
             r#"
-            UPDATE daily_progress_todos dpt
+            UPDATE daily_tasks dpt
             SET is_done = NOT dpt.is_done
             FROM daily_progress dp
             WHERE dpt.id = $1
             AND dpt.daily_progress_id = dp.id
             AND dp.user_id = $2
-            RETURNING dpt.id, dpt.todo_id, dpt.daily_progress_id, dpt.is_done, dpt.created_at
+            RETURNING dpt.id, dpt.task_id, dpt.daily_progress_id, dpt.is_done, dpt.created_at
             "#,
             id,
             user_id
@@ -189,29 +189,29 @@ impl ProgressRepo {
         .fetch_one(pool)
         .await?;
 
-        Ok(todo)
+        Ok(task)
     }
 
-    pub async fn fetch_all_daily_progress_todos(
+    pub async fn fetch_all_daily_progress_tasks(
         pool: &PgPool,
         daily_progress_id: &Uuid,
-    ) -> Result<Vec<CompleteDailyProgressTodo>> {
-        let todos = sqlx::query_as!(
-            CompleteDailyProgressTodo,
+    ) -> Result<Vec<CompleteDailyProgressTask>> {
+        let tasks = sqlx::query_as!(
+            CompleteDailyProgressTask,
             r#"
             SELECT
-            t.id AS daily_progress_todo_id,
+            t.id AS daily_progress_task_id,
             t.is_done,
             t.created_at,
-            td.id as todo_id,
-            td.title AS todo_title,
-            td.description AS todo_description,
+            td.id as task_id,
+            td.title AS task_title,
+            td.description AS task_description,
             c.slug AS category_slug,
             c.name AS category_name
 
   
-        FROM daily_progress_todos t
-        JOIN todos td ON td.id = t.todo_id
+        FROM daily_tasks t
+        JOIN tasks td ON td.id = t.task_id
         JOIN categories c ON c.id = td.category_id
         WHERE t.daily_progress_id = $1
         ORDER BY t.created_at DESC
@@ -221,9 +221,9 @@ impl ProgressRepo {
         .fetch_all(pool)
         .await?;
 
-    println!("all daily_progress todos: {:?}", todos);
+    println!("all daily_progress tasks: {:?}", tasks);
 
-        Ok(todos)
+        Ok(tasks)
     }
 
     pub async fn get_progress_id(
@@ -246,22 +246,22 @@ impl ProgressRepo {
         Ok(progress_id)
     }
 
-    pub async fn delete_daily_progress_todo(pool: &PgPool, id: &Uuid) -> Result<(), AppError> {
+    pub async fn delete_daily_progress_task(pool: &PgPool, id: &Uuid) -> Result<(), AppError> {
         let result = sqlx::query!(
             r#"
             WITH deleted_dpt AS (
-                DELETE FROM daily_progress_todos
+                DELETE FROM daily_tasks
                 WHERE id = $1
-                RETURNING todo_id
+                RETURNING task_id
             )
-            DELETE FROM todos
-            WHERE id = (SELECT todo_id FROM deleted_dpt)
+            DELETE FROM tasks
+            WHERE id = (SELECT task_id FROM deleted_dpt)
             "#,
             id
         ).execute(pool).await?;
 
         if result.rows_affected() == 0 {
-            return Err(AppError::Failed("Failed to delete todo".into()));
+            return Err(AppError::Failed("Failed to delete task".into()));
         }
 
         Ok(())

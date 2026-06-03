@@ -15,16 +15,16 @@ pub struct DailyProgress {
 }
 
 #[derive(Debug, FromRow, Serialize)]
-pub struct DailyProgressTodo {
+pub struct DailyProgressTask {
     pub id: Uuid,
-    pub todo_id: Uuid,
+    pub task_id: Uuid,
     pub daily_progress_id: Uuid,
     pub is_done: bool,
     pub created_at: PrimitiveDateTime
 }
 
 #[derive(Debug, Serialize)]
-pub struct DailyProgressTodoDto {
+pub struct DailyProgressTaskDto {
     pub id: Uuid,
     pub title: String,
     pub description: String,
@@ -34,16 +34,16 @@ pub struct DailyProgressTodoDto {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct DailyProgressTodoResponse {
-    pub todo: String,
+pub struct DailyProgressTaskResponse {
+    pub title: String,
     pub description: String,
     pub category_slug: String,
 }
 
 #[derive(Debug, Serialize)]
-pub struct ProgressTodoRespons {
-    pub progress_todo_id: Uuid,
-    pub todo_id: Uuid,
+pub struct ProgressTaskRespons {
+    pub progress_task_id: Uuid,
+    pub task_id: Uuid,
     pub daily_progress_id: Uuid,
     pub title: String,
     pub description: String,
@@ -52,11 +52,11 @@ pub struct ProgressTodoRespons {
 }
 
 #[derive(FromRow, Serialize, Deserialize, Debug)]
-pub struct CompleteDailyProgressTodo {
-    pub daily_progress_todo_id: Uuid,
-    pub todo_id: Uuid,
-    pub todo_title: String,
-    pub todo_description: String,
+pub struct CompleteDailyProgressTask {
+    pub daily_progress_task_id: Uuid,
+    pub task_id: Uuid,
+    pub task_title: String,
+    pub task_description: String,
     pub is_done: bool,
     pub created_at: PrimitiveDateTime,
     pub category_slug: String,
@@ -70,8 +70,8 @@ pub struct DailyProgressDto {
 }
 
 // #[derive(Debug, Deserialize)]
-// pub struct DailyProgressTodoDto {
-//     pub todo_id: Uuid,
+// pub struct DailyProgresstaskDto {
+//     pub task_id: Uuid,
 //     pub is_done: bool
 // }
 #[derive(Debug, Deserialize, Serialize)]

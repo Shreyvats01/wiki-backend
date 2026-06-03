@@ -21,8 +21,8 @@ pub enum AppError {
 
 #[derive(Debug, Error)]
 pub enum NotFoundError {
-    #[error("Todo don't found")]
-    TodoNotFound,
+    #[error("task don't found")]
+    taskNotFound,
     #[error("User Not found")]
     UserNotFound,
     #[error("Tag aren't found")]
@@ -39,8 +39,8 @@ pub enum NotFoundError {
 pub enum ValidationError {
     #[error("Message should not null")]
     InvalidMessage,
-    #[error("Todo must be 5 cherecters long")]
-    TodoTooShort,
+    #[error("task must be 5 cherecters long")]
+    taskTooShort,
     #[error("Description must be 5 cherecters long")]
     DescriptionTooShort,
     #[error("Description cannot be null")]

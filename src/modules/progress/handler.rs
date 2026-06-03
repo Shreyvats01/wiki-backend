@@ -5,7 +5,7 @@ use time::{Date, format_description::well_known::Iso8601};
 
 use crate::{
     common::{error::AppError, response::ApiResponse},
-    modules::{progress::{model::{DailyProgressDto, DailyProgressTodoResponse, IsExitsResponse}, service::ProgressService}, user::model::UserId},
+    modules::{progress::{model::{DailyProgressDto, DailyProgressTaskResponse, IsExitsResponse}, service::ProgressService}, user::model::UserId},
     state::AppState,
 };
 
@@ -31,44 +31,44 @@ pub async fn create_daily_progress_handler(
     )))
 }
 #[debug_handler]
-pub async fn create_daily_progress_todo_handler(
+pub async fn create_daily_progress_task_handler(
     State(state): State<AppState>,
     Extension(user_id): Extension<UserId>,
     Path(daily_progress_id): Path<Uuid>,
-    Json(dto): Json<DailyProgressTodoResponse>,
+    Json(dto): Json<DailyProgressTaskResponse>,
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
     println!("data inside field: {:?}", dto);
-    let daily_progress_todo = state.progress_service.create_daily_progress_todo(&daily_progress_id, &user_id.0, dto).await?;
+    let daily_progress_task = state.progress_service.create_daily_progress_task(&daily_progress_id, &user_id.0, dto).await?;
 
-    Ok(Json(ApiResponse::success("Successfuly created progress todo", daily_progress_todo)))
+    Ok(Json(ApiResponse::success("Successfuly created progress task", daily_progress_task)))
 }
 
-pub async fn fetch_daily_progress_todo_by_id(
+pub async fn fetch_daily_progress_task_by_id(
     State(state): State<AppState>,
-    Path(progress_todo_id): Path<Uuid>
+    Path(progress_task_id): Path<Uuid>
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
-    let daily_progress_todo = ProgressService::fetch_daily_progress_todo_id(&state.progress_service, &progress_todo_id).await?;
+    let daily_progress_task = ProgressService::fetch_daily_progress_task_id(&state.progress_service, &progress_task_id).await?;
 
-    Ok(Json(ApiResponse::success("Todo updated successfuly", daily_progress_todo)))
+    Ok(Json(ApiResponse::success("task updated successfuly", daily_progress_task)))
 
 }
-pub async fn toggle_daily_progress_todo_handler(
+pub async fn toggle_daily_progress_task_handler(
     State(state): State<AppState>,
     Extension(user_id): Extension<UserId>,
-    Path(progress_todo_id): Path<Uuid>
+    Path(progress_task_id): Path<Uuid>
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
-    let daily_progress_todo = ProgressService::toggle_daily_progress_todo(&state.progress_service, &progress_todo_id, &user_id.0).await?;
+    let daily_progress_task = ProgressService::toggle_daily_progress_task(&state.progress_service, &progress_task_id, &user_id.0).await?;
 
 
-    Ok(Json(ApiResponse::success("Toggle todo successfuly", daily_progress_todo)))
+    Ok(Json(ApiResponse::success("Toggle task successfuly", daily_progress_task)))
 }
-pub async fn fetch_all_daily_progress_todos(
+pub async fn fetch_all_daily_progress_tasks(
     State(state): State<AppState>,
     Path(daily_progress_id): Path<Uuid>
 )-> Result<Json<ApiResponse<impl serde::Serialize>>, AppError>  {
-    let todos = ProgressService::fetch_all_daily_progress_todo(&state.progress_service, &daily_progress_id).await?;
+    let tasks = ProgressService::fetch_all_daily_progress_task(&state.progress_service, &daily_progress_id).await?;
 
-    Ok(Json(ApiResponse::success("fetched all successfuly", todos)))
+    Ok(Json(ApiResponse::success("fetched all successfuly", tasks)))
 }
 
 pub async fn is_progress_exits_handler(
@@ -87,11 +87,11 @@ pub async fn is_progress_exits_handler(
 
 }
 
-pub async fn delete_daily_progress_todo_handler(
+pub async fn delete_daily_progress_task_handler(
     State(state): State<AppState>,
-    Path(progress_todo_id): Path<Uuid>
+    Path(progress_task_id): Path<Uuid>
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
-    ProgressService::delete_daily_progress_todo(&state.progress_service, &progress_todo_id).await?;
+    ProgressService::delete_daily_progress_task(&state.progress_service, &progress_task_id).await?;
 
-    Ok(Json(ApiResponse::success("Successfully deleted daily progress todo", None::<()>)))
+    Ok(Json(ApiResponse::success("Successfully deleted daily progress task", None::<()>)))
 }

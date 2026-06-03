@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{common::error::{AppError, ValidationError}};
 
 #[derive(Debug, Clone, FromRow, Serialize)]
-pub struct Todo {
+pub struct task {
     pub id: Uuid,
     pub user_id: Uuid,
     pub category_id: Uuid,
@@ -17,7 +17,7 @@ pub struct Todo {
 }
 
 #[derive(Debug, Clone, Serialize, FromRow)]
-pub struct TodoCred {
+pub struct taskCred {
     pub id: Uuid,
     pub title: String,
     pub description: String,
@@ -27,7 +27,7 @@ pub struct TodoCred {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct TodoResponse {
+pub struct taskResponse {
     pub id: Uuid,
     pub title: String,
     pub description: String,
@@ -74,34 +74,34 @@ pub struct Category {
 }
 
 #[derive(FromRow)]
-pub struct TagTodo {
+pub struct Tagtask {
     pub tag_id: Uuid,
     pub name: String,
     pub slug: String
 }
 
-pub struct NewTodo {
-    pub todo: String,
+pub struct Newtask {
+    pub task: String,
     pub description: String,
     pub category_id: Uuid,
     pub tags: Vec<String>
 }
 
-pub struct TodoDto {
-    pub todo: String,
+pub struct taskDto {
+    pub task: String,
     pub description: String,
     pub category_id: Uuid,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct UpdateTodoCredentials {
-    pub todo: Option<String>,
+pub struct UpdatetaskCredentials {
+    pub task: Option<String>,
     pub description: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct CreateTodoDto {
-    pub todo: String,
+pub struct CreatetaskDto {
+    pub task: String,
     pub description: String,
     pub is_done: bool,
     pub tags_slug: Vec<String>, 
@@ -147,15 +147,15 @@ impl CreateCategoryDto {
     }
 }
 
-impl TryFrom<CreateTodoDto> for NewTodo {
+impl TryFrom<CreatetaskDto> for Newtask {
     type Error = ValidationError;
 
-    fn try_from(value: CreateTodoDto) -> Result<Self, Self::Error> {
-        let todo = value.todo.trim();
+    fn try_from(value: CreatetaskDto) -> Result<Self, Self::Error> {
+        let task = value.task.trim();
         let description = value.description.trim();
 
-        if todo.len() < 5 {
-            return Err(ValidationError::TodoTooShort);
+        if task.len() < 5 {
+            return Err(ValidationError::taskTooShort);
         };
 
         if description.len() < 5 {
@@ -163,7 +163,7 @@ impl TryFrom<CreateTodoDto> for NewTodo {
         };
 
         return Ok(Self {
-            todo: todo.to_string(),
+            task: task.to_string(),
             description: description.to_string(),
             category_id: value.category_id,
             tags: value.tags_slug
