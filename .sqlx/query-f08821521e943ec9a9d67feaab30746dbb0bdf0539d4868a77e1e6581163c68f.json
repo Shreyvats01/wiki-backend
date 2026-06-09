@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH deleted_dpt AS (\n                DELETE FROM daily_tasks\n                WHERE id = $1\n                RETURNING task_id\n            )\n            DELETE FROM tasks\n            WHERE id = (SELECT task_id FROM deleted_dpt)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f08821521e943ec9a9d67feaab30746dbb0bdf0539d4868a77e1e6581163c68f"
+}

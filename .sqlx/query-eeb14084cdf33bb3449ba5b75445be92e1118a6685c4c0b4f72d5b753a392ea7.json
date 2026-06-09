@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT into tag_per_task (task_id, tag_id)\n            SELECT $1, tag_id\n            FROM unnest($2::uuid[]) As tag_id\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "eeb14084cdf33bb3449ba5b75445be92e1118a6685c4c0b4f72d5b753a392ea7"
+}

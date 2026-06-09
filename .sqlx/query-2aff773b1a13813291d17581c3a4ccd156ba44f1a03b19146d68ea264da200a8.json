@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT pt.id AS daily_task_id, pt.task_id, pt.daily_progress_id, pt.is_done, pt.created_at, t.title, t.description, t.category_id, COALESCE(\n               array_agg(tpt.tag_id) FILTER (WHERE tpt.tag_id IS NOT NULL), '{}') AS tag_ids\n            FROM daily_tasks pt\n            JOIN tasks t ON pt.task_id = t.id\n            LEFT JOIN tag_per_task tpt ON pt.task_id = tpt.task_id\n            WHERE pt.id = $1\n            GROUP BY\n                pt.id,\n                pt.task_id,\n                pt.daily_progress_id,\n                t.title,\n                t.description,\n                pt.is_done,\n                pt.created_at,\n                t.category_id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "daily_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "daily_progress_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_done",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "category_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "tag_ids",
+        "type_info": "UuidArray"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "2aff773b1a13813291d17581c3a4ccd156ba44f1a03b19146d68ea264da200a8"
+}

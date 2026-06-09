@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n            t.id AS daily_progress_task_id,\n            t.is_done,\n            t.created_at,\n            td.id as task_id,\n            td.title AS task_title,\n            td.description AS task_description,\n            c.slug AS category_slug,\n            c.name AS category_name,\n            COALESCE(\n                ARRAY_AGG(tpt.tag_id)\n                FILTER (WHERE tpt.tag_id IS NOT NULL),\n                '{}'\n            ) AS tag_ids\n  \n        FROM daily_tasks t\n        JOIN tasks td ON td.id = t.task_id\n        JOIN categories c ON c.id = td.category_id\n        LEFT JOIN tag_per_task tpt ON t.task_id = tpt.task_id\n        WHERE t.daily_progress_id = $1\n        GROUP BY\n            t.id,\n            t.is_done,\n            t.created_at,\n            td.id,\n            td.title,\n            td.description,\n            c.slug,\n            c.name\n        ORDER BY t.created_at DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "daily_progress_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "is_done",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 3,
+        "name": "task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "task_title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "task_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "category_slug",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "category_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "tag_ids",
+        "type_info": "UuidArray"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "5d5c4cd2d62d7d054a39552b6f77598b4e3ac1015417793305b46613728a2eeb"
+}
