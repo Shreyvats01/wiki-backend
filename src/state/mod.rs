@@ -1,17 +1,18 @@
-
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool};
+use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::modules::{progress::service::ProgressService, task::service::taskService, user::service::UserService};
+use crate::modules::{
+    progress::service::ProgressService, task::service::TaskService, user::service::UserService,
+};
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub jwt_encoding: EncodingKey,
     pub jwt_decoding: DecodingKey,
-    pub task_service: taskService,
+    pub task_service: TaskService,
     pub user_service: UserService,
     pub progress_service: ProgressService,
 }

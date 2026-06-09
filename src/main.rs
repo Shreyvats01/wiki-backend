@@ -2,7 +2,7 @@ use tower_http::cors::CorsLayer;
 
 use crate::{
     modules::{
-        progress::service::ProgressService, task::service::taskService, user::service::UserService,
+        progress::service::ProgressService, task::service::TaskService, user::service::UserService,
     },
     routes::create_app,
     state::AppState,
@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         pool: pool.clone(),
         jwt_decoding: DecodingKey::from_secret(secret.as_bytes()),
         jwt_encoding: EncodingKey::from_secret(secret.as_bytes()),
-        task_service: taskService::new(pool.clone()),
+        task_service: TaskService::new(pool.clone()),
         user_service: UserService::new(pool.clone()),
         progress_service: ProgressService::new(pool.clone()),
     };

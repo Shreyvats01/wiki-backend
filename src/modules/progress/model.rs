@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
-use uuid::Uuid;
 use time::{Date, PrimitiveDateTime};
-
+use uuid::Uuid;
 
 #[derive(Debug, FromRow, Serialize)]
 pub struct DailyProgress {
@@ -11,7 +10,7 @@ pub struct DailyProgress {
     pub day: Date,
 
     pub created_at: PrimitiveDateTime,
-    pub updated_at: PrimitiveDateTime
+    pub updated_at: PrimitiveDateTime,
 }
 
 #[derive(Debug, FromRow, Serialize)]
@@ -20,39 +19,44 @@ pub struct DailyProgressTask {
     pub task_id: Uuid,
     pub daily_progress_id: Uuid,
     pub is_done: bool,
-    pub created_at: PrimitiveDateTime
+    pub created_at: PrimitiveDateTime,
 }
 
 #[derive(Debug, Serialize)]
-pub struct DailyProgressTaskDto {
-    pub id: Uuid,
+pub struct DailyTaskDto {
+    pub task_id: Uuid,
+    pub daily_task_id: Uuid,
     pub title: String,
     pub description: String,
-    pub category_id: Uuid,
+    pub category_id: Option<Uuid>,
+    pub tags_id: Vec<Uuid>,
     pub is_done: bool,
-    pub created_at: PrimitiveDateTime
+    pub created_at: PrimitiveDateTime,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct DailyProgressTaskResponse {
+pub struct DailyTaskCTO {
     pub title: String,
     pub description: String,
-    pub category_slug: String,
+    pub category_id: Uuid,
+    pub tags: Vec<Uuid>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct ProgressTaskRespons {
-    pub progress_task_id: Uuid,
+    pub daily_task_id: Uuid,
     pub task_id: Uuid,
     pub daily_progress_id: Uuid,
     pub title: String,
     pub description: String,
     pub is_done: bool,
-    pub created_at: PrimitiveDateTime
+    pub category_id: Option<Uuid>,
+    pub tag_ids: Option<Vec<Uuid>>,
+    pub created_at: PrimitiveDateTime,
 }
 
 #[derive(FromRow, Serialize, Deserialize, Debug)]
-pub struct CompleteDailyProgressTask {
+pub struct CompleteDailyTask {
     pub daily_progress_task_id: Uuid,
     pub task_id: Uuid,
     pub task_title: String,
@@ -60,13 +64,13 @@ pub struct CompleteDailyProgressTask {
     pub is_done: bool,
     pub created_at: PrimitiveDateTime,
     pub category_slug: String,
-    pub category_name: String
+    pub category_name: String,
+    pub tag_ids: Option<Vec<Uuid>>,
 }
-// pub struct
 
 #[derive(Debug, Deserialize)]
 pub struct DailyProgressDto {
-    pub day: String
+    pub day: String,
 }
 
 // #[derive(Debug, Deserialize)]
@@ -77,5 +81,5 @@ pub struct DailyProgressDto {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct IsExitsResponse {
     pub id: Option<Uuid>,
-    pub is_exits: bool
+    pub is_exits: bool,
 }
