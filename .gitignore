@@ -2,3 +2,5 @@
 .env
 /docs
 .vscode
+Cargo.lock
+PLAN.md
