@@ -6,7 +6,7 @@ use time::Duration;
 
 use crate::{
     common::{error::{AppError, ValidationError}, response::ApiResponse},
-    modules::user::model::{LoginCredentials, LoginDto, SignUpCredentials, SignUpDto, UpdateVisibility, UserId},
+    modules::user::model::{LoginCredentials, LoginDto, SignUpCredentials, SignUpDto, UserId},
     state::AppState,
     utils::jwt::create_jwt_token,
 };
@@ -89,31 +89,9 @@ pub async fn get_user_handler(
 
 pub async fn get_user_by_username_handler(
     State(state): State<AppState>,
-    user_id: Option<Extension<UserId>>,
     Path(username): Path<String>,
 ) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
     let user = state.user_service.get_user_by_username(&username).await?; 
 
-    if !user.is_public {
-        let requester_id = user_id
-            .map(|Extension(user_id)| user_id.0)
-            .ok_or(AppError::Validation(ValidationError::UnauthorizedAccess))?;
-
-        if user.id != requester_id {
-            return Err(AppError::Validation(ValidationError::UnauthorizedAccess));
-        } 
-    }
-
     Ok(Json(ApiResponse::success("fetch user successfuly", user)))
-}
-
-#[debug_handler]
-pub async fn change_user_visibility_handler(
-    State(state): State<AppState>,
-    Extension(user_id): Extension<UserId>,
-    Json(visibility): Json<UpdateVisibility>
-) -> Result<Json<ApiResponse<impl serde::Serialize>>, AppError> {
-    state.user_service.change_visibility(user_id.0, visibility.is_public).await?;
-
-    Ok(Json(ApiResponse::success("User account visibility changed successfully", None::<()>)))
 }

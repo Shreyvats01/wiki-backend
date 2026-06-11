@@ -11,7 +11,7 @@ pub struct User {
     pub username: String,
     pub email: String,
     pub password: String,
-    pub is_public: bool
+    pub profile_image: Option<String>
 }
 
 #[derive(Serialize, Clone)]
@@ -20,12 +20,8 @@ pub struct UserResponseDto {
     pub name: String,
     pub username: String,
     pub email: String,
-    pub is_public: bool
-}
+    pub profile_image: Option<String>
 
-#[derive(Serialize, Deserialize)]
-pub struct UpdateVisibility {
-    pub is_public: bool
 }
 
 pub struct SignUpCredentials {
@@ -33,6 +29,7 @@ pub struct SignUpCredentials {
     pub username: String,
     pub email: String,
     pub password: String,
+    pub profile_image: Option<String>
 }
 
 pub struct LoginCredentials {
@@ -55,6 +52,7 @@ pub struct SignUpDto {
     pub username: String,
     pub email: String,
     pub password: String,
+    pub profile_image: Option<String>
 }
 
 impl TryFrom<SignUpDto> for SignUpCredentials {
@@ -81,7 +79,8 @@ impl TryFrom<SignUpDto> for SignUpCredentials {
             email: email.to_string(),
             name: name.to_string(),
             password: password.to_string(),
-            username: username.to_string()
+            username: username.to_string(),
+            profile_image: value.profile_image
         })
         
     }

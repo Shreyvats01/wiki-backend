@@ -29,10 +29,7 @@ impl UserService {
 
         let created_user = UserRepo::create(
             &self.pool,
-            &user.name,
-            &user.email,
-            &user.password,
-            &user.username,
+            user
         )
         .await?;
 
@@ -63,11 +60,6 @@ impl UserService {
             .ok_or_else(|| AppError::NotFound(NotFoundError::UserNotFound))?;
 
         Ok(user)
-    }
-
-    pub async fn change_visibility(&self, user_id: Uuid, is_public: bool) -> Result<(), AppError> {
-        UserRepo::change_visibility(&self.pool, &user_id, is_public).await?;
-        Ok(())
     }
 
     pub async fn get_user_by_username(&self, username: &str) -> Result<User, AppError> {

@@ -3,29 +3,27 @@ use uuid::Uuid;
 
 use crate::{
     common::error::AppError,
-    modules::{user::model::{User, UserResponseDto}},
+    modules::user::model::{SignUpCredentials, User, UserResponseDto},
 };
 pub struct UserRepo;
 
 impl UserRepo {
     pub async fn create(
         pool: &PgPool,
-        name: &str,
-        email: &str,
-        password: &str,
-        username: &str,
+        user: SignUpCredentials
     ) -> Result<UserResponseDto> {
         let user = sqlx::query_as!(
             UserResponseDto,
             r#"
         INSERT INTO users (name, username, email, password)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, name, username, email, is_public
+        RETURNING id, name, username, email, profile_image
         "#,
-            name,
-            username,
-            email,
-            password,
+            &user.name,
+            &user.username,
+            &user.email,
+            &user.password,
+            // &user.profile_image
         )
         .fetch_one(pool)
         .await?;
@@ -37,7 +35,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             UserResponseDto,
             r#"
-        SELECT id, name, username, email, is_public
+        SELECT id, name, username, email, profile_image
         FROM users
         WHERE id = $1
         "#,
@@ -71,7 +69,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             User,
             r#"
-        SELECT id, name, username, email, password, is_public
+        SELECT id, name, username, email, password, profile_image
         FROM users
         WHERE email = $1
         "#,
@@ -87,7 +85,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             User,
             r#"
-        SELECT id, name, username, email, password, is_public
+        SELECT id, name, username, email, password, profile_image
         FROM users
         WHERE username = $1
         "#,
@@ -97,31 +95,5 @@ impl UserRepo {
         .await?;
 
         Ok(user)
-    }
-
-    pub async fn change_visibility(
-        pool: &PgPool,
-        user_id: &Uuid,
-        is_public: bool,
-    ) -> Result<(), AppError> {
-        let result = sqlx::query!(
-            r#"
-            UPDATE users
-            SET is_public = $1
-            WHERE id = $2
-            "#,
-            is_public,
-            user_id
-        )
-        .execute(pool)
-        .await?;
-
-        if result.rows_affected() == 0 {
-            return Err(AppError::Failed(
-                "Failed to update user's visibility status".into(),
-            ));
-        }
-
-        Ok(())
     }
 }
